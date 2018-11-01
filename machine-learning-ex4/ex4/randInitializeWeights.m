@@ -9,6 +9,9 @@ function W = randInitializeWeights(L_in, L_out)
 %   the first column of W handles the "bias" terms
 %
 
+% Define epsilon hardcoded
+epsilon = 0.12
+
 % You need to return the following variables correctly 
 W = zeros(L_out, 1 + L_in);
 
@@ -19,12 +22,10 @@ W = zeros(L_out, 1 + L_in);
 % Note: The first column of W corresponds to the parameters for the bias unit
 %
 
+% calculate epsilon
+#epsilon = sqrt(6) / (sqrt(L_in) + sqrt(L_out))
 
-
-
-
-
-
+W = rand(L_out, 1 + L_in) * 2 * epsilon - epsilon
 
 
 % =========================================================================

@@ -61,26 +61,33 @@ Theta2_grad = zeros(size(Theta2));
 %               the regularization separately and then add them to Theta1_grad
 %               and Theta2_grad from Part 2.
 %
+y_one_hot_encoded = zeros(m, num_labels);
 
+for n = 1:num_labels
+  y_one_hot_encoded(:,n) = y==n;
+ endfor
 
+y_pred = sigmoid([ones(size(X,1),1) sigmoid([ones(size(X,1),1) X] * transpose(Theta1))] *
+ transpose(Theta2));
+z_two = [ones(size(X,1),1) X] * transpose(Theta1);
+a_two = sigmoid(z_two);
+z_three = [ones(size(X,1),1) a_two] * transpose(Theta2);
+a_three = sigmoid(z_three);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+J = m^-1 * sum(sum(-y_one_hot_encoded.*log(y_pred)-(1-y_one_hot_encoded).*log(1-y_pred)));
 
 
 
 % -------------------------------------------------------------
+delta_two = 0
+delta_one = 0
+error_output = y_pred - y_one_hot_encoded;
+error_hidden = transpose((transpose(Theta2) * transpose(error_output))(2:end,:)) .* sigmoidGradient(z_two);
+delta_two = delta_two + error_output * transpose(a_two);
+delta_one = delta_one + error_hidden * transpose(X);
+delta_two = delta_two(2:end);
+delta_one = delta_one(2:end);
+
 
 % =========================================================================
 
