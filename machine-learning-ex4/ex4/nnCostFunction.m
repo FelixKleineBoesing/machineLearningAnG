@@ -69,25 +69,47 @@ for n = 1:num_labels
 
 y_pred = sigmoid([ones(size(X,1),1) sigmoid([ones(size(X,1),1) X] * transpose(Theta1))] *
  transpose(Theta2));
+J = m^-1 * sum(sum(-y_one_hot_encoded.*log(y_pred)-(1-y_one_hot_encoded).*log(1-y_pred)));
+reg_part = (lambda/(2*m))*(sum(sum(Theta1(:,2:end).^2)) + sum(sum(Theta2(:,2:end).^2)))
+
+J = J + reg_part
+
+# compute the following for use in backpropagation - for vectorizing
 z_two = [ones(size(X,1),1) X] * transpose(Theta1);
 a_two = sigmoid(z_two);
 z_three = [ones(size(X,1),1) a_two] * transpose(Theta2);
 a_three = sigmoid(z_three);
 
-J = m^-1 * sum(sum(-y_one_hot_encoded.*log(y_pred)-(1-y_one_hot_encoded).*log(1-y_pred)));
-
-
-
 % -------------------------------------------------------------
-delta_two = 0
-delta_one = 0
-error_output = y_pred - y_one_hot_encoded;
-error_hidden = transpose((transpose(Theta2) * transpose(error_output))(2:end,:)) .* sigmoidGradient(z_two);
-delta_two = delta_two + error_output * transpose(a_two);
-delta_one = delta_one + error_hidden * transpose(X);
-delta_two = delta_two(2:end);
-delta_one = delta_one(2:end);
+for t = 1:m
 
+	a1 = [1; X(t,:)'];
+	z2 = Theta1 * a1;
+	a2 = [1; sigmoid(z2)];
+	z3 = Theta2 * a2;
+	a3 = sigmoid(z3);
+
+	yy = ([1:num_labels]==y(t))';
+	delta_3 = a3 - yy;
+
+	delta_2 = (Theta2' * delta_3) .* [1; sigmoidGradient(z2)];
+	delta_2 = delta_2(2:end); % Taking of the bias row
+	Theta1_grad = Theta1_grad + delta_2 * a1';
+	Theta2_grad = Theta2_grad + delta_3 * a2';
+end
+
+Theta1_grad = (1/m) * Theta1_grad + (lambda/m) * [zeros(size(Theta1, 1), 1) Theta1(:,2:end)];
+Theta2_grad = (1/m) * Theta2_grad + (lambda/m) * [zeros(size(Theta2, 1), 1) Theta2(:,2:end)];
+
+# vectorizing
+%error_output = y_pred - y_one_hot_encoded;
+%error_hidden = (transpose(Theta2) * transpose(error_output))(2:end,:) .* transpose(sigmoidGradient(z_two));
+
+%Theta1_grad = error_hidden * [ones(size(X,1),1) X];
+%Theta2_grad = transpose(error_output) * a_two;
+
+%Theta1_grad = (1/m) * Theta1_grad * (lambda/m) + [zeros(size(Theta1, 1),1) Theta1(:,2:end)]; 
+%Theta2_grad = [zeros(size(Theta2, 1),1) (1/m) * Theta2_grad * (lambda/m)] + [zeros(size(Theta2, 1),1) Theta2(:,2:end)];
 
 % =========================================================================
 
